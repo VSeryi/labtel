@@ -13,7 +13,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
 
@@ -80,6 +83,21 @@ public class ProjectPermissionService {
         return projectPermissionRepository.findById(id)
             .map(projectPermissionMapper::toDto);
     }
+    
+    /**
+     * Get one projectPermission by id.
+     *
+     * @param id the id of the entity
+     * @return the entity
+     */
+    @Transactional(readOnly = true)
+    public List<ProjectPermissionDTO> findAllByUserLogin(String userLogin) {
+        log.debug("Request to get ProjectPermission : {}", userLogin);
+        return projectPermissionRepository.findByUserLogin(userLogin)
+        	.stream()
+            .map(projectPermissionMapper::toDto)
+            .collect(Collectors.toList());
+    }
 
     /**
      * Delete the projectPermission by id.
@@ -105,4 +123,5 @@ public class ProjectPermissionService {
         return projectPermissionSearchRepository.search(queryStringQuery(query), pageable)
             .map(projectPermissionMapper::toDto);
     }
+
 }

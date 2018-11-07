@@ -1,6 +1,8 @@
 package es.urjc.etsii.labtel.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
+
+import es.urjc.etsii.labtel.security.SecurityUtils;
 import es.urjc.etsii.labtel.service.ProjectPermissionService;
 import es.urjc.etsii.labtel.web.rest.errors.BadRequestAlertException;
 import es.urjc.etsii.labtel.web.rest.util.HeaderUtil;
@@ -83,7 +85,8 @@ public class ProjectPermissionResource {
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, projectPermissionDTO.getId().toString()))
             .body(result);
     }
-
+    
+    
     /**
      * GET  /project-permissions : get all the projectPermissions.
      *
@@ -111,6 +114,21 @@ public class ProjectPermissionResource {
         log.debug("REST request to get ProjectPermission : {}", id);
         Optional<ProjectPermissionDTO> projectPermissionDTO = projectPermissionService.findOne(id);
         return ResponseUtil.wrapOrNotFound(projectPermissionDTO);
+    }
+    
+    /**
+     * GET  /project-permissions/:id : get the "id" projectPermission.
+     *
+     * @param id the id of the projectPermissionDTO to retrieve
+     * @return the ResponseEntity with status 200 (OK) and with body the projectPermissionDTO, or with status 404 (Not Found)
+     */
+    @GetMapping("/project-permissions/me")
+    @Timed
+    public ResponseEntity<List<ProjectPermissionDTO>> getProjectPermissions() {
+    	Optional<String> userLogin = SecurityUtils.getCurrentUserLogin();
+        log.debug("REST request to get ProjectPermission : {}", userLogin);
+        List<ProjectPermissionDTO> projectPermissionsDTO = projectPermissionService.findAllByUserLogin(userLogin.get());
+        return ResponseEntity.ok().body(projectPermissionsDTO);
     }
 
     /**
